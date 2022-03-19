@@ -1,13 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { plainToClass, plainToInstance } from 'class-transformer';
+import { plainToClass } from 'class-transformer';
 import { RoleEntity } from '../../../packages/entities/user/role.entity';
 import { ExceptionService } from '../../../packages/services/exception.service';
 import { RoleDto } from '../../../packages/dto/user/role.dto';
-import { isActive } from '../../../packages/queries/is-active.query';
 import { SystemException } from '../../../packages/exceptions/system.exception';
-import { DeleteDto } from '../../../packages/dto/response/delete.dto';
 
 @Injectable()
 export class RoleService {
