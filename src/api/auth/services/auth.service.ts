@@ -21,7 +21,7 @@ export class AuthService {
     private readonly userService: UserService,
   ) {}
 
-  async login(loginDto: LoginDto): Promise<string> {
+  async login(loginDto: LoginDto): Promise<any> {
     try {
       const user = await this.validateUser(loginDto);
 

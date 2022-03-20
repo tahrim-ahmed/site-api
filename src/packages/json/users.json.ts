@@ -1,4 +1,5 @@
 import { RoleName } from '../enum/role-name.enum';
+import {Payment} from "../enum/payment.enum";
 
 export const usersObject = [
   {
@@ -8,6 +9,7 @@ export const usersObject = [
     phone: '01717150423',
     password: 'admin01',
     role: RoleName.ADMIN_ROLE,
+    payment: Payment.Paid,
   },
   {
     firstName: 'Tahrim',
@@ -16,6 +18,7 @@ export const usersObject = [
     phone: '01733781618',
     password: 'miad1234',
     role: RoleName.ADMIN_ROLE,
+    payment: Payment.Paid,
   },
   {
     firstName: 'Tahrim',
@@ -24,5 +27,6 @@ export const usersObject = [
     phone: '01551810867',
     password: 'miad1234',
     role: RoleName.USER_ROLE,
+    payment: Payment.Paid,
   },
 ];
