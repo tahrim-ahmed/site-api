@@ -4,10 +4,10 @@ import { UserRoleEntity } from './user-role.entity';
 import { Payment } from '../../enum/payment.enum';
 
 @Entity({ name: 'users' })
-@Index('users-first-name-isactive-idx', ['lastName', 'isActive'])
-@Index('users-last-name-isactive-idx', ['firstName', 'isActive'])
-@Index('users-email-isactive-idx', ['email', 'isActive'])
-@Index('users-phone-isactive-idx', ['phone', 'isActive'])
+@Index('users-firstname-deletedat-idx', ['lastName', 'deletedAt'])
+@Index('users-lastname-deletedat-idx', ['firstName', 'deletedAt'])
+@Index('users-email-deletedat-idx', ['email', 'deletedAt'])
+@Index('users-phone-deletedat-idx', ['phone', 'deletedAt'])
 export class UserEntity extends CustomBaseEntity {
   @Column({ type: 'varchar', name: 'first_name', length: 65 })
   @Index('users-first-name-idx', { unique: false })

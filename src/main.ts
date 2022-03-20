@@ -3,12 +3,20 @@ import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { NestExpressApplication } from '@nestjs/platform-express';
+import { join } from 'path';
+export let NEST_APP: NestExpressApplication;
 
 async function bootstrap() {
   const logger = new Logger('Pay-Site-api-bootstrap');
 
-  const app = await NestFactory.create(AppModule);
-  app.setGlobalPrefix('api/v1');
+  NEST_APP = await NestFactory.create<NestExpressApplication>(AppModule);
+  NEST_APP.setGlobalPrefix('api/v1');
+
+  NEST_APP.useStaticAssets(join(__dirname, '..', 'public'), {
+    index: false,
+    prefix: '/public',
+  });
 
   const config = new DocumentBuilder()
     .setTitle('Pay-Site')
@@ -17,15 +25,15 @@ async function bootstrap() {
     .addTag('pay-site')
     .addBearerAuth()
     .build();
-  const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('pay-site-api', app, document);
+  const document = SwaggerModule.createDocument(NEST_APP, config);
+  SwaggerModule.setup('pay-site-api', NEST_APP, document);
 
-  const configService = app.get(ConfigService);
+  const configService = NEST_APP.get(ConfigService);
   const port = configService.get<number>('PORT');
 
-  app.enableCors();
+  NEST_APP.enableCors();
 
-  await app.listen(port);
+  await NEST_APP.listen(port);
 
   logger.log(
     `Documentation is running in http://localhost:${port}/pay-site-api`,

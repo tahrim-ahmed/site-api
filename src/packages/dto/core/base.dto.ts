@@ -1,5 +1,4 @@
 import { Allow } from 'class-validator';
-import { ActiveStatus } from '../../enum/active.enum';
 
 export abstract class BaseDto {
   @Allow()
@@ -9,7 +8,7 @@ export abstract class BaseDto {
   version: number;
 
   @Allow()
-  isActive: ActiveStatus;
+  deletedAt: Date;
 
   @Allow()
   createdBy: string | null;
@@ -18,7 +17,7 @@ export abstract class BaseDto {
   updatedBy: string | null;
 
   @Allow()
-  createAt: Date | null;
+  createdAt: Date | null;
 
   @Allow()
   updatedAt: Date | null;

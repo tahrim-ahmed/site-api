@@ -11,6 +11,7 @@ import { UserRoleDto } from '../../../packages/dto/user/user-role.dto';
 import { CustomUserRoleDto } from '../../../packages/dto/user/custom-user-role.dto';
 import { RoleName } from '../../../packages/enum/role-name.enum';
 import { ChangePasswordDto } from '../../../packages/dto/user/change-password.dto';
+import * as fs from 'fs';
 
 @Injectable()
 export class AuthService {
@@ -20,27 +21,19 @@ export class AuthService {
     private readonly userService: UserService,
   ) {}
 
-  async login(loginDto: LoginDto): Promise<{
-    token: UserResponseDto;
-    user: UserDto;
-  }> {
+  async login(loginDto: LoginDto): Promise<string> {
     try {
       const user = await this.validateUser(loginDto);
 
       if (user) {
         const userRoles = await this.userService.findRolesByUserId(user.id);
         const userResponseDto = await this.generatePayload(user, userRoles);
-        userResponseDto.accessToken = await this.generateToken(
-          userResponseDto,
-          loginDto,
-        );
 
         delete user.password;
 
-        return {
-          token: userResponseDto,
-          user,
-        };
+        const payload = { response: userResponseDto, user };
+
+        return await this.generateToken(payload, loginDto.isRemembered);
       } else {
         throw new SystemException({
           message: 'User info or password is not valid',
@@ -53,8 +46,14 @@ export class AuthService {
 
   async validateUser(loginDto: LoginDto): Promise<UserDto> {
     try {
+      let emailOrPhone = loginDto.phone;
+
+      if (!emailOrPhone) {
+        emailOrPhone = loginDto.email;
+      }
+
       const user: UserDto = await this.userService.findOneByEmailOrPhone(
-        loginDto.phone || loginDto.email,
+        emailOrPhone,
       );
 
       if (!user) {
@@ -115,17 +114,12 @@ export class AuthService {
 
   /************* relation setter ***************/
 
-  async generateToken(
-    payload: UserResponseDto,
-    loginDto: LoginDto,
-  ): Promise<string> {
-    const privateKEY = this.configService
-      .get('PRIVATE_KEY')
-      .replace(/\\n/g, '\n');
+  async generateToken(payload: any, isRemembered = 1): Promise<string> {
+    const privateKEY = fs.readFileSync('env/jwtRS256.key');
 
     let accessToken;
 
-    if (loginDto.isRemembered === 1) {
+    if (isRemembered === 1) {
       accessToken = jwt.sign({ ...payload }, privateKEY, {
         expiresIn: '1d',
         algorithm: 'RS256',

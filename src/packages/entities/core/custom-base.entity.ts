@@ -1,10 +1,12 @@
 import {
   BaseEntity,
   Column,
+  CreateDateColumn,
+  DeleteDateColumn,
   PrimaryGeneratedColumn,
+  UpdateDateColumn,
   VersionColumn,
 } from 'typeorm';
-import { ActiveStatus } from '../../enum/active.enum';
 
 export class CustomBaseEntity extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
@@ -13,13 +15,8 @@ export class CustomBaseEntity extends BaseEntity {
   @VersionColumn()
   version: number;
 
-  @Column({
-    type: 'enum',
-    name: 'is_active',
-    enum: ActiveStatus,
-    default: `${ActiveStatus.enabled}`,
-  })
-  isActive: ActiveStatus;
+  @DeleteDateColumn({ name: 'deleted_at' })
+  deletedAt: Date;
 
   @Column({ type: 'uuid', name: 'created_by', nullable: true })
   createdBy: string | null;
@@ -27,17 +24,9 @@ export class CustomBaseEntity extends BaseEntity {
   @Column({ type: 'uuid', name: 'updated_by', nullable: true })
   updatedBy: string | null;
 
-  @Column({
-    type: 'timestamp',
-    name: 'created_at',
-    nullable: true,
-  })
-  createAt: Date | null;
+  @CreateDateColumn({ name: 'created_at' })
+  createdAt: Date;
 
-  @Column({
-    type: 'timestamp',
-    name: 'updated_at',
-    nullable: true,
-  })
-  updatedAt: Date | null;
+  @UpdateDateColumn({ name: 'updated_at' })
+  updatedAt: Date;
 }

@@ -21,7 +21,6 @@ import { ResponseDto } from '../../../packages/dto/response/response.dto';
 import { DtoValidationPipe } from '../../../packages/pipes/dto-validation.pipe';
 import { UserDto } from '../../../packages/dto/user/user.dto';
 import { IntValidationPipe } from '../../../packages/pipes/int-validation.pipe';
-import { CreateUserDto } from '../../../packages/dto/user/create/create-user.dto';
 import { UuidValidationPipe } from '../../../packages/pipes/uuid-validation.pipe';
 
 @ApiTags('User')
@@ -72,13 +71,13 @@ export class UserController {
     );
   }
 
-  @ApiBody({ type: CreateUserDto })
+  @ApiBody({ type: UserDto })
   @Post('registration')
   create(
     @Body(
       new DtoValidationPipe({ whitelist: true, forbidNonWhitelisted: true }),
     )
-    createUserDto: CreateUserDto,
+    createUserDto: UserDto,
   ): Promise<ResponseDto> {
     const userDto = this.userService.create(createUserDto);
 

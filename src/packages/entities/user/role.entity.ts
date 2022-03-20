@@ -3,7 +3,7 @@ import { UserRoleEntity } from './user-role.entity';
 import { CustomBaseEntity } from '../core/custom-base.entity';
 
 @Entity({ name: 'roles' })
-@Index('roles-role-isactive-idx', ['role', 'isActive'])
+@Index('roles-role-deletedat-idx', ['role', 'deletedAt'])
 export class RoleEntity extends CustomBaseEntity {
   @Column({ type: 'varchar', name: 'role', length: 65 })
   @Index('roles-role-idx', { unique: true })

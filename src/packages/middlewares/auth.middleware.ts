@@ -6,9 +6,11 @@ import * as fs from 'fs';
 @Injectable()
 export class AuthMiddleware implements NestMiddleware {
   private static toResponse(res: Response, message: string): Response {
-    return res.status(HttpStatus.UNAUTHORIZED).json({
-      message,
-    });
+    return res
+      .json({
+        message,
+      })
+      .status(HttpStatus.UNAUTHORIZED);
   }
 
   async use(req: Request, res: Response, next: NextFunction) {
@@ -34,13 +36,11 @@ export class AuthMiddleware implements NestMiddleware {
           if (err) return AuthMiddleware.toResponse(res, 'Token is invalid!!');
           else {
             req['_user'] = decoded;
+            next();
           }
         },
       );
-
-      next();
     } catch (error) {
-      console.log(error);
       return AuthMiddleware.toResponse(res, 'Authorization is denied');
     }
   }

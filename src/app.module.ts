@@ -6,6 +6,7 @@ import { configTypeorm } from './packages/typeorm-config/typeorm.config';
 import { RoleModule } from './api/role/role.module';
 import { UserModule } from './api/users/user.module';
 import { AuthModule } from './api/auth/auth.module';
+import { FilesModule } from './api/files/files.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { AuthModule } from './api/auth/auth.module';
     AuthModule,
     RoleModule,
     UserModule,
+    FilesModule,
   ],
   controllers: [],
   providers: [],

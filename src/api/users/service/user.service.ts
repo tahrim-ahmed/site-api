@@ -14,14 +14,10 @@ import { BcryptService } from '../../../packages/services/bcrypt.service';
 import { RequestService } from '../../../packages/services/request.service';
 import { UserResponseDto } from '../../../packages/dto/response/user-response.dto';
 import { UserDto } from '../../../packages/dto/user/user.dto';
-import { isActive } from '../../../packages/queries/is-active.query';
 import { SystemException } from '../../../packages/exceptions/system.exception';
-import { CreateUserDto } from '../../../packages/dto/user/create/create-user.dto';
 import { RoleName } from '../../../packages/enum/role-name.enum';
-import { UserType } from '../../../packages/enum/user-type.enum';
 import { ChangePasswordDto } from '../../../packages/dto/user/change-password.dto';
 import { DeleteDto } from '../../../packages/dto/response/delete.dto';
-import { isInActive } from '../../../packages/queries/is-inactive.query';
 import { UserRoleDto } from '../../../packages/dto/user/user-role.dto';
 
 @Injectable()
@@ -47,7 +43,7 @@ export class UserService {
 
   findAll = async (): Promise<UserDto[]> => {
     try {
-      const users = await this.userRepository.find({ ...isActive });
+      const users = await this.userRepository.find();
       return plainToInstance(UserDto, users);
     } catch (error) {
       throw new SystemException(error);
@@ -58,7 +54,6 @@ export class UserService {
     try {
       const user = await this.userRepository.findOne({
         ...dto,
-        ...isActive,
       });
       this.exceptionService.notFound(user, 'User is not found');
       return plainToClass(UserDto, user);
@@ -75,14 +70,10 @@ export class UserService {
       const query = this.userRepository.createQueryBuilder('user');
 
       const user = await query
-        .where(
-          '(user.phone = :phone OR user.email = :email) and user.isActive = :isActive',
-          {
-            phone: emailOrPhone,
-            email: emailOrPhone,
-            ...isActive,
-          },
-        )
+        .where('(user.phone = :phone OR user.email = :email)', {
+          phone: emailOrPhone,
+          email: emailOrPhone,
+        })
         .getOne();
 
       if (!mustReturn) {
@@ -98,9 +89,9 @@ export class UserService {
     }
   };
 
-  create = async (createUserDto: CreateUserDto): Promise<UserDto> => {
+  create = async (userDto: UserDto): Promise<UserDto> => {
     try {
-      const user = await this.createUser(createUserDto);
+      const user = await this.createUser(userDto);
 
       return plainToClass(UserDto, user);
     } catch (error) {
@@ -108,37 +99,22 @@ export class UserService {
     }
   };
 
-  createUser = async (createUserDto: CreateUserDto): Promise<UserEntity> => {
-    createUserDto.password = await this.bcryptService.hashPassword(
-      createUserDto.password,
-    );
+  createUser = async (userDto: UserDto): Promise<UserEntity> => {
+    userDto.password = await this.bcryptService.hashPassword(userDto.password);
 
-    let userDto = createUserDto as UserDto;
     userDto = this.requestService.forCreate(userDto);
     const user = this.userRepository.create(userDto);
 
     const savedUser = await this.userRepository.save(user);
 
-    switch (createUserDto.type) {
-      case UserType.ADMIN: {
-        await this.createUserTypeRole(savedUser, RoleName.ADMIN_ROLE);
-        break;
-      }
-      case UserType.USER: {
-        await this.createUserTypeRole(savedUser, RoleName.USER_ROLE);
-        break;
-      }
-    }
+    this.createUserTypeRole(savedUser);
     return savedUser;
   };
 
-  createUserTypeRole = async (
-    user: UserEntity,
-    role: RoleName,
-  ): Promise<boolean> => {
+  createUserTypeRole = async (user: UserEntity): Promise<boolean> => {
     let userRole = new UserRoleEntity();
     userRole.user = user;
-    userRole.role = await this.getRoleByName(role);
+    userRole.role = await this.getUserRole();
     userRole = this.requestService.forCreate(userRole);
     return Promise.resolve(!!(await this.userRoleRepository.save(userRole)));
   };
@@ -189,13 +165,10 @@ export class UserService {
 
   remove = async (id: string): Promise<DeleteDto> => {
     try {
-      const savedUser = await this.getUser(id);
-
-      await this.userRepository.save({
-        ...savedUser,
-        ...isInActive,
+      const deletedUser = await this.userRepository.softDelete({
+        id,
       });
-      return Promise.resolve(new DeleteDto(true));
+      return Promise.resolve(new DeleteDto(!!deletedUser.affected));
     } catch (error) {
       throw new SystemException(error);
     }
@@ -210,9 +183,6 @@ export class UserService {
   ): Promise<[UserDto[], number]> => {
     try {
       const query = this.userRepository.createQueryBuilder('q');
-      query.where('q.isActive =:isActive', {
-        ...isActive,
-      });
 
       if (search) {
         query.andWhere(
@@ -252,7 +222,7 @@ export class UserService {
   findById = async (id: string, relation = true): Promise<UserDto> => {
     try {
       const user = await this.userRepository.findOne(
-        { id, ...isActive },
+        { id },
         {
           relations: relation ? ['roles'] : [],
         },
@@ -270,7 +240,6 @@ export class UserService {
     const user = await this.userRepository.findOne({
       where: {
         id,
-        ...isActive,
       },
     });
     this.exceptionService.notFound(user, 'User not found!!');
@@ -281,22 +250,18 @@ export class UserService {
     const role = await this.roleRepository.findOne({
       where: {
         id,
-        ...isActive,
       },
     });
     this.exceptionService.notFound(role, 'Role not found!!');
     return role;
   };
 
-  getRoleByName = async (role: RoleName): Promise<RoleEntity> => {
-    const roleByName = await this.roleRepository.findOne({
+  getUserRole = async (): Promise<RoleEntity> => {
+    return await this.roleRepository.findOne({
       where: {
-        role,
-        ...isActive,
+        role: RoleName.USER_ROLE,
       },
     });
-    this.exceptionService.notFound(roleByName, 'Role not found!!');
-    return roleByName;
   };
 
   /************************ for login *******************/
