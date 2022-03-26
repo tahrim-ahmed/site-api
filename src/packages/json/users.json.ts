@@ -1,5 +1,5 @@
 import { RoleName } from '../enum/role-name.enum';
-import {Payment} from "../enum/payment.enum";
+import { Payment } from '../enum/payment.enum';
 
 export const usersObject = [
   {

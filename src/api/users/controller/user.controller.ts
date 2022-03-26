@@ -83,7 +83,7 @@ export class UserController {
 
     return this.responseService.toDtoResponse(
       HttpStatus.CREATED,
-      'User created Successfully',
+      'Registration Success!!',
       userDto,
     );
   }
