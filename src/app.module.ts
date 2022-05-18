@@ -7,6 +7,8 @@ import { RoleModule } from './api/role/role.module';
 import { UserModule } from './api/users/user.module';
 import { AuthModule } from './api/auth/auth.module';
 import { FilesModule } from './api/files/files.module';
+import { ProductModule } from './api/product/product.module';
+import { ClientModule } from './api/client/client.module';
 
 @Module({
   imports: [
@@ -16,6 +18,8 @@ import { FilesModule } from './api/files/files.module';
     RoleModule,
     UserModule,
     FilesModule,
+    ProductModule,
+    ClientModule,
   ],
   controllers: [],
   providers: [],

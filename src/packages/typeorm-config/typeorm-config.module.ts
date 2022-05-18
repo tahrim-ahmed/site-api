@@ -4,6 +4,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { RoleEntity } from '../entities/user/role.entity';
 import { UserEntity } from '../entities/user/user.entity';
 import { UserRoleEntity } from '../entities/user/user-role.entity';
+import { ProductEntity } from '../entities/product/product.entity';
+import { ClientEntity } from '../entities/client/client.entity';
 
 @Global()
 @Module({
@@ -17,7 +19,13 @@ import { UserRoleEntity } from '../entities/user/user-role.entity';
         username: configService.get('DATABASE_USER'),
         password: configService.get('DATABASE_PASSWORD'),
         database: configService.get('DATABASE_DB'),
-        entities: [UserEntity, UserRoleEntity, RoleEntity],
+        entities: [
+          UserEntity,
+          UserRoleEntity,
+          RoleEntity,
+          ProductEntity,
+          ClientEntity,
+        ],
         synchronize: <boolean>(
           (configService.get<number>('DATABASE_SYNCRONIZE') == 1)
         ),

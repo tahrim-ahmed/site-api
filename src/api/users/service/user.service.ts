@@ -89,9 +89,19 @@ export class UserService {
     }
   };
 
-  create = async (userDto: UserDto): Promise<UserDto> => {
+  registration = async (userDto: UserDto): Promise<UserDto> => {
     try {
       const user = await this.createUser(userDto);
+
+      return plainToClass(UserDto, user);
+    } catch (error) {
+      throw new SystemException(error);
+    }
+  };
+
+  create = async (userDto: UserDto): Promise<UserDto> => {
+    try {
+      const user = await this.createNewUser(userDto);
 
       return plainToClass(UserDto, user);
     } catch (error) {
@@ -111,10 +121,30 @@ export class UserService {
     return savedUser;
   };
 
+  createNewUser = async (userDto: UserDto): Promise<UserEntity> => {
+    userDto.password = await this.bcryptService.hashPassword(userDto.password);
+
+    userDto = this.requestService.forCreate(userDto);
+    const user = this.userRepository.create(userDto);
+
+    const savedUser = await this.userRepository.save(user);
+
+    this.createNewUserTypeRole(savedUser);
+    return savedUser;
+  };
+
   createUserTypeRole = async (user: UserEntity): Promise<boolean> => {
     let userRole = new UserRoleEntity();
     userRole.user = user;
     userRole.role = await this.getUserRole();
+    userRole = this.requestService.forCreate(userRole);
+    return Promise.resolve(!!(await this.userRoleRepository.save(userRole)));
+  };
+
+  createNewUserTypeRole = async (user: UserEntity): Promise<boolean> => {
+    let userRole = new UserRoleEntity();
+    userRole.user = user;
+    userRole.role = await this.getAdminUserRole();
     userRole = this.requestService.forCreate(userRole);
     return Promise.resolve(!!(await this.userRoleRepository.save(userRole)));
   };
@@ -186,7 +216,7 @@ export class UserService {
 
       if (search) {
         query.andWhere(
-          '((q.firstName ILIKE  :search) OR (q.lastName ILIKE  :search) OR (q.phone ILIKE  :search) OR (q.email ILIKE  :search))',
+          '((q.firstName LIKE  :search) OR (q.lastName LIKE  :search) OR (q.phone LIKE  :search) OR (q.email LIKE  :search))',
           { search: `%${search}%` },
         );
       }
@@ -196,15 +226,15 @@ export class UserService {
           let direction: 'DESC' | 'ASC' = 'DESC';
           if (['DESC', 'ASC'].includes(order.toUpperCase())) {
             direction = order.toUpperCase() as 'DESC' | 'ASC';
-            query.orderBy(`q.${sort}`, direction, 'NULLS LAST');
+            query.orderBy(`q.${sort}`, direction);
           } else {
-            query.orderBy(`q.${sort}`, direction, 'NULLS LAST');
+            query.orderBy(`q.${sort}`, direction);
           }
         } else {
-          query.orderBy(`q.${sort}`, 'DESC', 'NULLS LAST');
+          query.orderBy(`q.${sort}`, 'DESC');
         }
       } else {
-        query.orderBy(`q.updatedAt`, 'DESC', 'NULLS LAST');
+        query.orderBy(`q.updatedAt`, 'DESC');
       }
 
       if (page && limit) {
@@ -260,6 +290,14 @@ export class UserService {
     return await this.roleRepository.findOne({
       where: {
         role: RoleName.USER_ROLE,
+      },
+    });
+  };
+
+  getAdminUserRole = async (): Promise<RoleEntity> => {
+    return await this.roleRepository.findOne({
+      where: {
+        role: RoleName.ADMIN_ROLE,
       },
     });
   };

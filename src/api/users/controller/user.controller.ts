@@ -73,6 +73,24 @@ export class UserController {
 
   @ApiBody({ type: UserDto })
   @Post('registration')
+  registration(
+    @Body(
+      new DtoValidationPipe({ whitelist: true, forbidNonWhitelisted: true }),
+    )
+    createUserDto: UserDto,
+  ): Promise<ResponseDto> {
+    const userDto = this.userService.registration(createUserDto);
+
+    return this.responseService.toDtoResponse(
+      HttpStatus.CREATED,
+      'Registration Success!!',
+      userDto,
+    );
+  }
+
+  @ApiBearerAuth()
+  @ApiBody({ type: UserDto })
+  @Post('create')
   create(
     @Body(
       new DtoValidationPipe({ whitelist: true, forbidNonWhitelisted: true }),
@@ -83,7 +101,7 @@ export class UserController {
 
     return this.responseService.toDtoResponse(
       HttpStatus.CREATED,
-      'Registration Success!!',
+      'User Create Success!!',
       userDto,
     );
   }
