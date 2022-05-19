@@ -1,5 +1,6 @@
-import { Column, Entity, Index } from 'typeorm';
+import { Column, Entity, Index, JoinColumn, OneToMany } from 'typeorm';
 import { CustomBaseEntity } from '../core/custom-base.entity';
+import { InvoiceEntity } from '../invoice/invoice.entity';
 
 @Entity({ name: 'clients' })
 @Index('clients-code-deletedat-idx', ['code', 'deletedAt'])
@@ -25,4 +26,8 @@ export class ClientEntity extends CustomBaseEntity {
 
   @Column({ type: 'text', name: 'shipping' })
   shipping: string;
+
+  @OneToMany(() => InvoiceEntity, (invoiceEntity) => invoiceEntity.client)
+  @JoinColumn({ name: 'client_id' })
+  invoices: InvoiceEntity[];
 }

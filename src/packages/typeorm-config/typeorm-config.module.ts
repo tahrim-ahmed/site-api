@@ -6,6 +6,8 @@ import { UserEntity } from '../entities/user/user.entity';
 import { UserRoleEntity } from '../entities/user/user-role.entity';
 import { ProductEntity } from '../entities/product/product.entity';
 import { ClientEntity } from '../entities/client/client.entity';
+import { InvoiceEntity } from '../entities/invoice/invoice.entity';
+import { InvoiceDetailsEntity } from '../entities/invoice/invoice-details.entity';
 
 @Global()
 @Module({
@@ -25,6 +27,8 @@ import { ClientEntity } from '../entities/client/client.entity';
           RoleEntity,
           ProductEntity,
           ClientEntity,
+          InvoiceEntity,
+          InvoiceDetailsEntity,
         ],
         synchronize: <boolean>(
           (configService.get<number>('DATABASE_SYNCRONIZE') == 1)

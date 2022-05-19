@@ -9,6 +9,7 @@ import { AuthModule } from './api/auth/auth.module';
 import { FilesModule } from './api/files/files.module';
 import { ProductModule } from './api/product/product.module';
 import { ClientModule } from './api/client/client.module';
+import { InvoiceModule } from './api/invoice/invoice.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { ClientModule } from './api/client/client.module';
     FilesModule,
     ProductModule,
     ClientModule,
+    InvoiceModule,
   ],
   controllers: [],
   providers: [],

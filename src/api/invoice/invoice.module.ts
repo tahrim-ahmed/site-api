@@ -1,17 +1,15 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ResponseService } from '../../../package/services/response.service';
-import { ExceptionService } from '../../../package/services/exception.service';
-import { RequestService } from '../../../package/services/request.service';
-import { InvoiceService } from './services/invoice.service';
+import { InvoiceEntity } from '../../packages/entities/invoice/invoice.entity';
+import { InvoiceDetailsEntity } from '../../packages/entities/invoice/invoice-details.entity';
+import { ProductEntity } from '../../packages/entities/product/product.entity';
+import { ClientModule } from '../client/client.module';
 import { InvoiceController } from './controllers/invoice.controller';
-import { InvoiceEntity } from '../../../package/entities/shako/invoice.entity';
-import { SchemeModule } from '../scheme/scheme.module';
-import { RetailerModule } from '../retailer/retailer.module';
-import { PermissionService } from '../../../package/services/permission.service';
-import { DistributorModule } from '../distributor/distributor.module';
-import { InvoiceDetailsEntity } from '../../../package/entities/shako/invoice-details.entity';
-import { ProductEntity } from '../../../package/entities/inventory/product.entity';
+import { InvoiceService } from './services/invoice.service';
+import { ResponseService } from '../../packages/services/response.service';
+import { ExceptionService } from '../../packages/services/exception.service';
+import { RequestService } from '../../packages/services/request.service';
+import { PermissionService } from '../../packages/services/permission.service';
 
 @Module({
   imports: [
@@ -20,9 +18,7 @@ import { ProductEntity } from '../../../package/entities/inventory/product.entit
       InvoiceDetailsEntity,
       ProductEntity,
     ]),
-    SchemeModule,
-    RetailerModule,
-    DistributorModule,
+    ClientModule,
   ],
   controllers: [InvoiceController],
   providers: [

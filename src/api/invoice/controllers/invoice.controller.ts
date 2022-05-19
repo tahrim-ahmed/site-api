@@ -1,35 +1,27 @@
 import {
   Body,
   Controller,
-  Delete,
   Get,
   HttpStatus,
   Param,
-  Patch,
   Post,
-  Put,
   Query,
-  UseGuards,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiBody,
   ApiCreatedResponse,
-  ApiOkResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { ResponseService } from '../../../../package/services/response.service';
-import { RequestService } from '../../../../package/services/request.service';
-import { ResponseDto } from '../../../../package/dto/response/response.dto';
-import { DtoValidationPipe } from '../../../../package/pipes/dto-validation.pipe';
 import { InvoiceService } from '../services/invoice.service';
-import { UuidValidationPipe } from '../../../../package/pipes/uuid-validation.pipe';
-import { CreateInvoiceDto } from '../../../../package/dto/shako/create/create-invoice.dto';
-import { FaGuard } from '../../../../package/guards/fa.guard';
 import { ApiImplicitQuery } from '@nestjs/swagger/dist/decorators/api-implicit-query.decorator';
-import { IntValidationPipe } from '../../../../package/pipes/int-validation.pipe';
-import { ManagementGuard } from '../../../../package/guards/management.guard';
-import { SuperAdminGuard } from '../../../../package/guards/super.admin.guard';
+import { ResponseService } from '../../../packages/services/response.service';
+import { RequestService } from '../../../packages/services/request.service';
+import { IntValidationPipe } from '../../../packages/pipes/int-validation.pipe';
+import { ResponseDto } from '../../../packages/dto/response/response.dto';
+import { CreateInvoiceDto } from '../../../packages/dto/create/create-invoice.dto';
+import { DtoValidationPipe } from '../../../packages/pipes/dto-validation.pipe';
+import { UuidValidationPipe } from '../../../packages/pipes/uuid-validation.pipe';
 
 @ApiTags('Invoice')
 @ApiBearerAuth()
@@ -73,22 +65,7 @@ export class InvoiceController {
     type: String,
   })
   @ApiImplicitQuery({
-    name: 'area',
-    required: false,
-    type: String,
-  })
-  @ApiImplicitQuery({
-    name: 'region',
-    required: false,
-    type: String,
-  })
-  @ApiImplicitQuery({
-    name: 'territory',
-    required: false,
-    type: String,
-  })
-  @ApiImplicitQuery({
-    name: 'retailer',
+    name: 'client',
     required: false,
     type: String,
   })
@@ -113,10 +90,7 @@ export class InvoiceController {
     @Query('limit', new IntValidationPipe()) limit: number,
     @Query('sort') sort: string,
     @Query('order') order: string,
-    @Query('area') area: string,
-    @Query('region') region: string,
-    @Query('territory') territory: string,
-    @Query('retailer') retailer: string,
+    @Query('client') client: string,
     @Query('search') search: string,
     @Query('startDate') startDate: string,
     @Query('endDate') endDate: string,
@@ -126,10 +100,6 @@ export class InvoiceController {
       limit,
       sort,
       order,
-      area,
-      region,
-      territory,
-      retailer,
       search,
       startDate,
       endDate,
@@ -143,43 +113,6 @@ export class InvoiceController {
     );
   }
 
-  @Get('deleted')
-  deleted(
-    @Query('page', new IntValidationPipe()) page: number,
-    @Query('limit', new IntValidationPipe()) limit: number,
-    @Query('sort') sort: string,
-    @Query('order') order: string,
-    @Query('area') area: string,
-    @Query('region') region: string,
-    @Query('territory') territory: string,
-    @Query('retailer') retailer: string,
-    @Query('search') search: string,
-    @Query('startDate') startDate: string,
-    @Query('endDate') endDate: string,
-  ): Promise<ResponseDto> {
-    const invoices = this.invoiceService.deleted(
-      page,
-      limit,
-      sort,
-      order,
-      area,
-      region,
-      territory,
-      retailer,
-      search,
-      startDate,
-      endDate,
-    );
-    return this.responseService.toPaginationResponse(
-      HttpStatus.OK,
-      null,
-      page,
-      limit,
-      invoices,
-    );
-  }
-
-  @UseGuards(new FaGuard())
   @ApiCreatedResponse({
     description: 'Invoice successfully added!!',
   })
@@ -196,6 +129,7 @@ export class InvoiceController {
   ): Promise<ResponseDto> {
     const modifiedDto = this.requestService.forCreate(invoiceDto);
     const invoice = this.invoiceService.create(modifiedDto);
+    console.log(invoice);
     return this.responseService.toDtoResponse(
       HttpStatus.CREATED,
       'Invoice successfully added!!',
@@ -203,8 +137,7 @@ export class InvoiceController {
     );
   }
 
-  @UseGuards(new FaGuard())
-  @ApiOkResponse({
+  /*@ApiOkResponse({
     description: 'Invoice successfully updated!!',
   })
   @ApiBody({ type: CreateInvoiceDto })
@@ -227,10 +160,9 @@ export class InvoiceController {
       'Invoice successfully updated!!',
       invoice,
     );
-  }
+  }*/
 
-  @UseGuards(new ManagementGuard())
-  @ApiOkResponse({ description: 'Invoice successfully deleted!' })
+  /* @ApiOkResponse({ description: 'Invoice successfully deleted!' })
   @Delete(':id')
   remove(
     @Param('id', new UuidValidationPipe()) id: string,
@@ -241,62 +173,7 @@ export class InvoiceController {
       'Invoice successfully deleted!',
       deleted,
     );
-  }
-
-  @UseGuards(new SuperAdminGuard())
-  @ApiBearerAuth()
-  @ApiOkResponse({ description: 'Invoice successfully restored!' })
-  @Delete(':id/restore')
-  restore(@Param('id', new UuidValidationPipe()) id: string): Promise<any> {
-    const invoiceDto = this.invoiceService.restore(id);
-    return this.responseService.toResponse(
-      <number>HttpStatus.OK,
-      'Invoice successfully restored!',
-      invoiceDto,
-    );
-  }
-
-  @UseGuards(new ManagementGuard())
-  @ApiOkResponse({ description: 'Invoice successfully verified!' })
-  @Patch('verify/:id')
-  verify(
-    @Param('id', new UuidValidationPipe()) id: string,
-  ): Promise<ResponseDto> {
-    const verified = this.invoiceService.verify(id);
-    return this.responseService.toResponse(
-      HttpStatus.OK,
-      'Invoice successfully verified!',
-      verified,
-    );
-  }
-
-  @UseGuards(new ManagementGuard())
-  @ApiOkResponse({ description: 'Distributor check successfully changed!' })
-  @Patch('distributor-check/:id')
-  distributorCheck(
-    @Param('id', new UuidValidationPipe()) id: string,
-  ): Promise<ResponseDto> {
-    const verified = this.invoiceService.distributorCheck(id);
-    return this.responseService.toResponse(
-      HttpStatus.OK,
-      'Distributor check successfully changed!',
-      verified,
-    );
-  }
-
-  @UseGuards(new ManagementGuard())
-  @ApiOkResponse({ description: 'Verification successfully reverted!' })
-  @Patch('revert-verify/:id')
-  revertVerify(
-    @Param('id', new UuidValidationPipe()) id: string,
-  ): Promise<ResponseDto> {
-    const revertVerified = this.invoiceService.revertVerify(id);
-    return this.responseService.toResponse(
-      HttpStatus.OK,
-      'Verification successfully reverted!',
-      revertVerified,
-    );
-  }
+  }*/
 
   @Get(':id')
   findById(

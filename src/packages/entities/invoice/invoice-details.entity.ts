@@ -2,7 +2,7 @@ import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 import { CustomBaseEntity } from '../core/custom-base.entity';
 import { StringToNumericTransformer } from '../../transformers/string-to-numeric.transformer';
 import { InvoiceEntity } from './invoice.entity';
-import {ProductEntity} from "../product/product.entity";
+import { ProductEntity } from '../product/product.entity';
 
 @Entity({ name: 'invoice_details' })
 export class InvoiceDetailsEntity extends CustomBaseEntity {
@@ -28,6 +28,16 @@ export class InvoiceDetailsEntity extends CustomBaseEntity {
     transformer: new StringToNumericTransformer(),
   })
   unitMRP: number;
+
+  @Column({
+    type: 'decimal',
+    name: 'discount',
+    precision: 20,
+    scale: 6,
+    nullable: false,
+    transformer: new StringToNumericTransformer(),
+  })
+  discount: number;
 
   @ManyToOne(
     () => ProductEntity,
